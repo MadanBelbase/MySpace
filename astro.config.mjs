@@ -5,7 +5,8 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://madanbelbase.github.io/MySpace/', // ✅ correct for your repo
+  site: 'https://madanbelbase.github.io/', // ✅ correct for your repo
+  base: 'MySpace/',
   vite: {
     plugins: [tailwindcss()],
   },
