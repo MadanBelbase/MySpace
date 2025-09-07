@@ -2,7 +2,7 @@
 
 title: "How to Build Your First Node.js API with Express and Handle Data Efficiently"
 description: ""
-pubDate: "2025-09-05"
+pubDate: "2025-09-08"
 tags: ["Nodejs", "Development"]
 ---
 
