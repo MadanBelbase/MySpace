@@ -76,7 +76,7 @@ const getRelativeTime = (date) => {
                 {getRelativeTime(post.data.pubDate)} • {Math.ceil(post.body.split(' ').length / 200)} min read
               </p>
               <p class="text-gray-700 text-base mb-4 leading-relaxed">{post.data.description}</p>
-              <a href={`/MySpace/blog/${post.slug}/`} 
+              <a href={`/blog/${post.slug}/`} 
                  class="text-blue-600 font-medium hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg transition duration-200"
                  aria-label={`Read more about ${post.data.title}`}>
                 Read post <span aria-hidden="true">→</span>
@@ -91,7 +91,7 @@ const getRelativeTime = (date) => {
             <h2 class="text-xl font-bold text-gray-900 mb-4">Read more on</h2>
             {categories.map(category => (
               <div>
-                <a href={`/MySpace/blog/tag/${category.name.toLowerCase()}/`} 
+                <a href={`/blog/tag/${category.name.toLowerCase()}/`} 
                    class="flex items-center justify-between text-gray-700 hover:text-blue-600 text-base py-2 border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg"
                    aria-label={`View posts in ${category.name} category`}>
                   <span>{category.name}</span>
@@ -99,7 +99,7 @@ const getRelativeTime = (date) => {
                 </a>
               </div>
             ))}
-            <a href="/MySpace/blog/" 
+            <a href="/blog/" 
                class="text-blue-600 font-medium hover:underline block mt-4 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg"
                aria-label="View all categories">All categories</a>
           </div>
