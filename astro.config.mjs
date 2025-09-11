@@ -5,16 +5,17 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://madanbelbase.com.np/', // ✅ correct for your repo
-  base: '/',
+  site: 'https://madanbelbase.com.np', // no trailing slash needed
+  integrations: [mdx()],
   vite: {
     plugins: [tailwindcss()],
   },
-  integrations: [mdx()],
   markdown: {
     shikiConfig: {
       theme: 'github-dark',
     },
   },
 });
+
+
 

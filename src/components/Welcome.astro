@@ -1,127 +1,175 @@
 ---
 import BaseLayout from '../layouts/BlogLayout.astro';
 import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import profile from '../assets/profile.jpeg';
 
 // Current date for relative time calculation
-const currentDate = new Date('2025-09-07T17:58:00+0545');
+const currentDate = new Date('2025-09-11T21:00:00+0545');
 
 // Get all blog posts sorted by date
 const allPosts = await getCollection('blog');
 const latestPosts = allPosts
-  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate))
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime())
   .slice(0, 3);
 
 // Calculate category counts
-const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags || ['misc'])))
+const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags ?? ['misc'])))
   .map(tag => ({
     name: tag,
-    count: allPosts.filter(post => post.data.tags?.includes(tag) || !post.data.tags).length
-  }));
+    count: allPosts.filter(post => post.data.tags?.includes(tag) ?? tag === 'misc').length
+  }))
+  .sort((a, b) => b.count - a.count); // Sort by count for prominence
 
 // Function to calculate relative time
-const getRelativeTime = (date) => {
-  const diffMs = currentDate - new Date(date);
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  return diffDays === 0 ? "Today" : `${diffDays} days ago`;
+const getRelativeTime = (date: string | Date): string => {
+  try {
+    const diffMs = currentDate.getTime() - new Date(date).getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(date));
+  } catch {
+    return 'Unknown date';
+  }
 };
-
 ---
 
-  <main class="min-h-screen p-4 md:p-8 bg-white">
+  <main class="min-h-screen p-4 sm:p-6 md:p-8 bg-white">
     <div class="container max-w-6xl mx-auto">
       <!-- Hero Section with Profile Image -->
-      <section class="flex flex-col md:flex-row items-center md:items-start justify-between mb-10 gap-6">
+      <section class="flex flex-col md:flex-row items-center md:items-start justify-between mb-12 gap-8">
         <!-- Hero Text -->
         <div class="text-center md:text-left md:w-2/3">
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium mb-3">
+          <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Welcome to my digital space
           </div>
-          <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">I'm Madan, Web Designer & Student</h1>
-          <p class="text-gray-700 text-base max-w-2xl mx-auto md:mx-0 mb-4 leading-relaxed">
-            I am a Computer Engineering student fueled by curiosity, exploring web design, software development, and AI to create practical digital solutions.
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">
+            I'm Madan, Web Designer & Student
+          </h1>
+          <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto md:mx-0 mb-6 leading-relaxed">
+            I'm a Computer Engineering student passionate about web design, software development, and AI, crafting practical and innovative digital solutions.
           </p>
+          <a
+            href="/about"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+            aria-label="Learn more about Madan Belbase"
+          >
+            About Me <span aria-hidden="true">→</span>
+          </a>
         </div>
 
         <!-- Profile Image -->
         <div class="relative group md:w-1/3 text-center">
-          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-300 -z-10"></div>
-          <img 
-            src={profile.src} 
-            alt="Madan Belbase" 
+          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
+          <img
+            src={profile.src}
+            alt="Madan Belbase"
             aria-label="Profile picture of Madan Belbase"
-            width="120"
-            height="120"
+            width={160}
+            height={160}
             loading="lazy"
-            class="w-24 h-24 md:w-30 md:h-30 rounded-full border-2 border-white shadow-md 
+            class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full border-4 border-white shadow-lg mx-auto
                    transform group-hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-                   ring-1 ring-offset-1 ring-blue-300/30 ring-offset-blue-50/20 mx-auto"
+                   ring-4 ring-offset-2 ring-blue-200/50 ring-offset-white"
           />
         </div>
       </section>
 
       <!-- Recently Published Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Blog Posts -->
         <div class="lg:col-span-2 space-y-6">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">Recently published</h2>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Recently Published</h2>
           {latestPosts.map(post => (
-            <article class="p-5 bg-gray-50 rounded-lg border border-gray-200 hover:bg-white hover:shadow-md transition-all duration-200">
-              <h3 class="text-xl font-semibold text-gray-900 mb-2" aria-label={`Blog post: ${post.data.title}`}>
+            <article
+              class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300"
+              aria-labelledby={`post-title-${post.slug}`}
+            >
+              <h3 id={`post-title-${post.slug}`} class="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
                 {post.data.title}
               </h3>
-              <p class="text-sm text-gray-600 mb-2">
-                {getRelativeTime(post.data.pubDate)} • {Math.ceil(post.body.split(' ').length / 200)} min read
-              </p>
-              <p class="text-gray-700 text-base mb-4 leading-relaxed">{post.data.description}</p>
-              <a href={`/blog/${post.slug}/`} 
-                 class="text-blue-600 font-medium hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg transition duration-200"
-                 aria-label={`Read more about ${post.data.title}`}>
+              <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                <time datetime={post.data.pubDate}>{getRelativeTime(post.data.pubDate)}</time>
+                <span class="text-gray-300">•</span>
+                <span>{Math.ceil(post.body.split(' ').length / 200)} min read</span>
+              </div>
+              <p class="text-gray-600 text-base mb-4 leading-relaxed line-clamp-3">{post.data.description}</p>
+              <a
+                href={`/blog/${post.slug}/`}
+                class="text-blue-600 font-medium hover:text-blue-700 hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg transition duration-200"
+                aria-label={`Read more about ${post.data.title}`}
+              >
                 Read post <span aria-hidden="true">→</span>
               </a>
             </article>
           ))}
+          <a
+            href="/blog/"
+            class="inline-flex items-center mt-6 text-blue-600 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+            aria-label="View all blog posts"
+          >
+            View all posts <span aria-hidden="true">→</span>
+          </a>
         </div>
 
         <!-- Categories Sidebar -->
         <aside class="space-y-6">
-          <div class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Read more on</h2>
+          <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Explore by Category</h2>
             {categories.map(category => (
-              <div>
-                <a href={`/blog/tag/${category.name.toLowerCase()}/`} 
-                   class="flex items-center justify-between text-gray-700 hover:text-blue-600 text-base py-2 border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg"
-                   aria-label={`View posts in ${category.name} category`}>
-                  <span>{category.name}</span>
-                  <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full" aria-hidden="true">{category.count}</span>
-                </a>
-              </div>
+              <a
+                href={`/blog/tag/${category.name.toLowerCase()}/`}
+                class="flex items-center justify-between text-gray-700 hover:text-blue-600 text-base py-3 border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+                aria-label={`View posts in ${category.name} category`}
+              >
+                <span class="font-medium">{category.name}</span>
+                <span class="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full" aria-hidden="true">
+                  {category.count}
+                </span>
+              </a>
             ))}
-            <a href="/blog/" 
-               class="text-blue-600 font-medium hover:underline block mt-4 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:rounded-lg"
-               aria-label="View all categories">All categories</a>
+            <a
+              href="/blog/"
+              class="text-blue-600 font-medium hover:underline block mt-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+              aria-label="View all categories"
+            >
+              All categories
+            </a>
           </div>
         </aside>
       </section>
+
+      
     </div>
   </main>
 
   <style is:global>
-    /* Smooth & modern focus styles */
+    /* Fonts */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #1e293b;
+    }
+
+    /* Smooth focus styles */
     a:focus,
-    button:focus {
+    button:focus,
+    input:focus {
       outline: none;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* soft blue glow */
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
       border-radius: 8px;
-      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     a:focus-visible,
-    button:focus-visible {
-      transform: scale(1.02); /* subtle zoom */
+    button:focus-visible,
+    input:focus-visible {
+      transform: scale(1.02);
     }
 
     /* Responsive adjustments */
@@ -139,16 +187,29 @@ const getRelativeTime = (date) => {
       .lg:col-span-2 {
         grid-column: span 1;
       }
-      .p-5 {
-        padding: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .text-3xl {
+        font-size: 1.875rem;
       }
-      .w-24.h-24 {
-        width: 20%;
-        height: 20%;
+      .text-4xl {
+        font-size: 2.25rem;
       }
-      .md:w-30.md:h-30 {
-        width: 25%;
-        height: 25%;
+      .text-5xl {
+        font-size: 2.5rem;
+      }
+      .w-32.h-32 {
+        width: 6rem;
+        height: 6rem;
+      }
+      .sm:w-40.sm:h-40 {
+        width: 7rem;
+        height: 7rem;
+      }
+      .md:w-48.md:h-48 {
+        width: 8rem;
+        height: 8rem;
       }
     }
   </style>
