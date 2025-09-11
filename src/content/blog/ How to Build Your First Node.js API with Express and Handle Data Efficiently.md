@@ -65,7 +65,7 @@ Now let's see how it works by using Postman to test our API.
 
   Here check for the GET request at localhost:3000/menu. This endpoint retrieves all menu items from the hotel menu.
 
-    URL: http://localhost:3000/menu
+    URL: http://localhost:3000/
  Method: GET
 
 ![alt text](image-5.png)
@@ -74,7 +74,7 @@ Now let's see how it works by using Postman to test our API.
 
 To get a specific menu item by its ID.
 
-    URL: http://localhost:3000/menu/1
+    URL: http://localhost:3000/1
 
 Method: GET
 Expected Response:
@@ -88,7 +88,7 @@ Expected Response:
 
    To add a new item to the menu.
 
-     URL: http://localhost:3000/menu
+     URL: http://localhost:3000
 
 ![alt text](image-7.png)
 
@@ -96,7 +96,7 @@ Expected Response:
 
    Send a PUT request to:
     
-    http://localhost:3000/menu/3
+    http://localhost:3000/3
  
 
    with updated JSON data:
@@ -112,7 +112,7 @@ Expected Response:
 ### 5. Delete a Menu Item <br>
 Send a DELETE request to:
 
-       http://localhost:3000/menu/3
+       http://localhost:3000/3
 
 
 ![alt text](image-9.png)
