@@ -10,7 +10,7 @@ const currentDate = new Date('2025-09-07T17:58:00+0545');
 const allPosts = await getCollection('blog');
 const latestPosts = allPosts
   .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate))
-  .slice(0, 3); // Get 3 most recent posts
+  .slice(0, 3);
 
 // Calculate category counts
 const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags || ['misc'])))
@@ -23,8 +23,9 @@ const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags ||
 const getRelativeTime = (date) => {
   const diffMs = currentDate - new Date(date);
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  return diffDays === 0 ? 'Today' : `${diffDays} days ago`;
+  return diffDays === 0 ? "Today" : `${diffDays} days ago`;
 };
+
 ---
 
   <main class="min-h-screen p-4 md:p-8 bg-white">
