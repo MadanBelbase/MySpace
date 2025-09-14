@@ -56,8 +56,7 @@ const recommendedPosts = allPosts
                 day: 'numeric'
               })}
             </time>
-            <span class="text-gray-300">•</span>
-            <span>{Math.ceil(post.body.split(' ').length / 200)} min read</span>
+            <span> • {Math.ceil(post.body.split(' ').length /200)} min read</span> 
           </div>
           {post.data.image && (
             <figure class="my-10 text-center">
@@ -75,7 +74,7 @@ const recommendedPosts = allPosts
         </header>
 
         <!-- Blog Content -->
-        <div class="content-area max-w-[750px] mx-auto space-y-6 text-lg">
+        <div class="content-area max-w-[850px] mx-auto space-y-3 text-lg ml-0">
           <Content />
         </div>
 
