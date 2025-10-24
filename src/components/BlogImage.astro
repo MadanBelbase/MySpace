@@ -1,4 +1,4 @@
----
+cd ---
 import { Image } from "astro:assets";
 const { src, alt, width = 800 } = Astro.props;
 ---
@@ -7,4 +7,5 @@ const { src, alt, width = 800 } = Astro.props;
   <Image src={src} alt={alt} width={width} class="rounded-xl shadow-md max-w-full h-auto" />
   {alt && <figcaption class="text-center text-sm text-gray-600 mt-3">{alt}</figcaption>}
 </figure>
+
 
