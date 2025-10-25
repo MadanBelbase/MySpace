@@ -19,11 +19,11 @@ const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags ??
     name: tag,
     count: allPosts.filter(post => post.data.tags?.includes(tag) ?? tag === 'misc').length
   }))
-  .sort((a, b) => b.count - a.count); // Sort by count for prominence
+  .sort((a, b) => b.count - a.count);
 
-  const getRelativeTime = (date: string | Date): string => {
+const getRelativeTime = (date: string | Date): string => {
   try {
-    const currentDate = new Date(); // Define currentDate
+    const currentDate = new Date();
     const diffMs = currentDate.getTime() - new Date(date).getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays === 0) return 'Today';
@@ -36,180 +36,199 @@ const categories = Array.from(new Set(allPosts.flatMap(post => post.data.tags ??
 };
 ---
 
-  <main class="min-h-screen p-4 sm:p-6 md:p-8 bg-white">
-    <div class="container max-w-6xl mx-auto">
-      <!-- Hero Section with Profile Image -->
-      <section class="flex flex-col md:flex-row items-center md:items-start justify-between mb-12 gap-8">
-        <!-- Hero Text -->
-        <div class="text-center md:text-left md:w-2/3">
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Welcome to my digital space
-          </div>
-          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 tracking-tight">
-            I'm Madan, Web Designer & Student
-          </h1>
-          <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto md:mx-0 mb-6 leading-relaxed">
-            I'm a Computer Engineering student passionate about web design, software development, and AI, crafting practical and innovative digital solutions.
-          </p>
-          <a
-            href="/about"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-            aria-label="Learn more about Madan Belbase"
-          >
-            About Me <span aria-hidden="true">→</span>
-          </a>
+<main class="min-h-screen ">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
+    
+    <!-- Hero Section with Profile Image -->
+    <section class="flex flex-col md:flex-row items-center md:items-start justify-between mb-16 gap-8">
+      
+      <!-- Hero Text -->
+      <div class="text-center md:text-left md:w-2/3">
+        <div class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-4 border border-blue-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Welcome to my digital space
         </div>
+        
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
+          I'm Madan, Web Designer & Student
+        </h1>
+        
+        <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto md:mx-0 mb-6 leading-relaxed">
+          I'm a Computer Engineering student passionate about web design, software development, and AI, crafting practical and innovative digital solutions.
+        </p>
+        
+        <a
+          href="/about"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
+          aria-label="Learn more about Madan Belbase"
+        >
+          About Me <span aria-hidden="true">→</span>
+        </a>
+      </div>
 
-        <!-- Profile Image -->
-        <div class="relative group md:w-1/3 text-center">
-          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
-          <img
-            src={profile.src}
-            alt="Madan Belbase"
-            aria-label="Profile picture of Madan Belbase"
-            width={160}
-            height={160}
-            loading="lazy"
-            class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full border-4 border-white shadow-lg mx-auto
-                   transform group-hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-                   ring-4 ring-offset-2 ring-blue-200/50 ring-offset-white"
-          />
-        </div>
-      </section>
-      <!-- Recently Published Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <!-- Blog Posts -->
-        <div class="lg:col-span-2 space-y-6">
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Recently Published</h2>
+      <!-- Profile Image -->
+      <div class="relative group md:w-1/3">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
+        <img
+          src={profile.src}
+          alt="Madan Belbase"
+          aria-label="Profile picture of Madan Belbase"
+          width={192}
+          height={192}
+          loading="lazy"
+          class="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl mx-auto
+                 transform group-hover:scale-105 transition-transform duration-300
+                 ring-4 ring-offset-4 ring-blue-100 ring-offset-gray-50"
+        />
+      </div>
+    </section>
+
+    <!-- Recently Published Section -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Blog Posts -->
+      <div class="lg:col-span-2">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Recently Published</h2>
+        
+        <div class="space-y-6">
           {latestPosts.map(post => (
             <article
-              class="p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300"
+              class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200"
               aria-labelledby={`post-title-${post.slug}`}
             >
-              <h3 id={`post-title-${post.slug}`} class="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
-                {post.data.title}
+              <h3 id={`post-title-${post.slug}`} class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
+                <a href={`/blog/${post.slug}/`} class="hover:text-blue-600 transition-colors duration-200">
+                  {post.data.title}
+                </a>
               </h3>
-              <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                <time datetime={post.data.pubDate}>{getRelativeTime(post.data.pubDate)}</time>
+              
+              <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
+                <time datetime={post.data.pubDate} class="font-medium">{getRelativeTime(post.data.pubDate)}</time>
                 <span class="text-gray-300">•</span>
                 <span>{Math.ceil(post.body.split(' ').length / 200)} min read</span>
               </div>
-              <p class="text-gray-600 text-base mb-4 leading-relaxed line-clamp-3">{post.data.description}</p>
+              
+              <p class="text-gray-600 text-base mb-5 leading-relaxed">
+                {post.data.description}
+              </p>
+              
               <a
                 href={`/blog/${post.slug}/`}
-                class="text-blue-600 font-medium hover:text-blue-700 hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg transition duration-200"
+                class="inline-flex items-center gap-1.5 text-blue-600 font-semibold focus:outline-none"
                 aria-label={`Read more about ${post.data.title}`}
               >
                 Read post <span aria-hidden="true">→</span>
               </a>
             </article>
           ))}
+        </div>
+        
+        <div class="mt-8">
           <a
             href="/blog/"
-            class="inline-flex items-center mt-6 text-blue-600 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+            class="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700 transition-colors duration-200"
             aria-label="View all blog posts"
           >
             View all posts <span aria-hidden="true">→</span>
           </a>
         </div>
+      </div>
 
-        <!-- Categories Sidebar -->
-        <aside class="space-y-6">
-          <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Explore by Category</h2>
+      <!-- Categories Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-8">
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Explore by Category</h2>
+          
+          <div class="space-y-1">
             {categories.map(category => (
               <a
                 href={`/blog/tag/${category.name.toLowerCase()}/`}
-                class="flex items-center justify-between text-gray-700 hover:text-blue-600 text-base py-3 border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+                class="flex items-center justify-between text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-base py-3 px-3 rounded-lg transition-all duration-200 focus:outline-none group"
                 aria-label={`View posts in ${category.name} category`}
               >
                 <span class="font-medium">{category.name}</span>
-                <span class="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full" aria-hidden="true">
+                <span class="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200" aria-hidden="true">
                   {category.count}
                 </span>
               </a>
             ))}
+          </div>
+          
+          <div class="mt-6 pt-6 border-t border-gray-200">
             <a
               href="/blog/"
-              class="text-blue-600 font-medium hover:underline block mt-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
+              class="block text-center py-2.5 px-4 bg-gray-50 text-gray-700 rounded-lg font-medium hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 focus:outline-none"
               aria-label="View all categories"
             >
-              All categories
+              Browse All Categories
             </a>
           </div>
-        </aside>
-      </section>
+        </div>
+      </aside>
+    </section>
+  </div>
+</main>
 
-      
-    </div>
-  </main>
+<style is:global>
+  /* Fonts */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-  <style is:global>
-    /* Fonts */
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #ffffff;
-      color: #1e293b;
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Clean focus styles - only visible for keyboard navigation */
+  a:focus {
+    outline: none;
+  }
+
+  a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .md:flex-row {
+      flex-direction: column;
     }
-
-    /* Smooth focus styles */
-    a:focus,
-    button:focus,
-    input:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-      border-radius: 8px;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    .lg:grid-cols-3 {
+      grid-template-columns: 1fr;
     }
+  }
 
-    a:focus-visible,
-    button:focus-visible,
-    input:focus-visible {
-      transform: scale(1.02);
+  @media (max-width: 640px) {
+    .text-3xl {
+      font-size: 1.875rem;
     }
-
-    /* Responsive adjustments */
-    @media (max-width: 1024px) {
-      .md:flex-row {
-        flex-direction: column;
-      }
-      .md:w-2/3,
-      .md:w-1/3 {
-        width: 100%;
-      }
-      .lg:grid-cols-3 {
-        grid-template-columns: 1fr;
-      }
-      .lg:col-span-2 {
-        grid-column: span 1;
-      }
+    .text-4xl {
+      font-size: 2.25rem;
     }
-
-    @media (max-width: 640px) {
-      .text-3xl {
-        font-size: 1.875rem;
-      }
-      .text-4xl {
-        font-size: 2.25rem;
-      }
-      .text-5xl {
-        font-size: 2.5rem;
-      }
-      .w-32.h-32 {
-        width: 6rem;
-        height: 6rem;
-      }
-      .sm:w-40.sm:h-40 {
-        width: 7rem;
-        height: 7rem;
-      }
-      .md:w-48.md:h-48 {
-        width: 8rem;
-        height: 8rem;
-      }
+    .text-5xl {
+      font-size: 2.5rem;
     }
-  </style>
+  }
 
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

@@ -24,43 +24,74 @@ const posts = await getCollection('blog');
 const filteredPosts = posts
   .filter((post) => post.data.tags?.map((t) => t.toLowerCase()).includes(tag.toLowerCase()))
   .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+
+const getRelativeTime = (date: string | Date): string => {
+  try {
+    const currentDate = new Date();
+    const diffMs = currentDate.getTime() - new Date(date).getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(date));
+  } catch {
+    return 'Unknown date';
+  }
+};
 ---
 
 <BaseLayout title={`Posts tagged with "${tag}"`} description={`Explore all blog posts related to ${tag} on Madan's Blog.`}>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2935284525797601"
      crossorigin="anonymous"></script>
-  <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-white">
-    <div class="max-w-4xl mx-auto">
+  
+  <div class="min-h-screen ">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+      
       <!-- Header -->
-      <div class="text-center mb-16">
-        <div class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+      <div class="mb-12">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-6 transition-colors duration-200 focus:outline-none"
+          aria-label="Back to all posts"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
+          Back to all posts
+        </a>
+        
+        <div class="flex items-center gap-4 mb-3">
+          <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 capitalize">
+              {tag}
+            </h1>
+            <p class="text-gray-600 mt-1">
+              {filteredPosts.length} {filteredPosts.length === 1 ? 'article' : 'articles'}
+            </p>
+          </div>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-          Tag: <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{tag}</span>
-        </h1>
-        <p class="text-lg text-gray-600">
-          {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''} found
-        </p>
       </div>
 
       <!-- No posts message -->
       {filteredPosts.length === 0 && (
-        <div class="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="text-xl text-gray-600 mb-6">No posts found for this tag</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-gray-900 mb-2">No posts found</h2>
+          <p class="text-gray-600 mb-6">There are no articles with this tag yet.</p>
           <a
             href="/blog"
-            class="inline-flex items-center font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 focus:outline-none"
             aria-label="Browse all blog posts"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
             Browse all articles
           </a>
         </div>
@@ -68,78 +99,61 @@ const filteredPosts = posts
 
       <!-- Posts list -->
       {filteredPosts.length > 0 && (
-        <div class="space-y-8">
+        <div class="space-y-6">
           {filteredPosts.map((post) => (
             <article
-              class="group relative p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300"
+              class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200"
               aria-labelledby={`post-title-${post.slug}`}
             >
-              <div class="absolute -inset-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div class="relative">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                  <h2 id={`post-title-${post.slug}`} class="text-xl sm:text-2xl font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                    <a href={`/blog/${post.slug}/`} class="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg">
-                      <span class="absolute inset-0" aria-hidden="true"></span>
-                      {post.data.title}
-                    </a>
-                  </h2>
-                  <time class="text-sm text-gray-500 whitespace-nowrap" datetime={post.data.pubDate.toISOString()}>
-                    {new Date(post.data.pubDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </time>
-                </div>
-                {post.data.description && (
-                  <p class="text-gray-600 text-base mb-4 leading-relaxed line-clamp-2">{post.data.description}</p>
-                )}
-                <div class="flex items-center justify-between">
-                  <a
-                    href={`/blog/${post.slug}/`}
-                    class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
-                    aria-label={`Read more about ${post.data.title}`}
-                  >
-                    Read article
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all duration-200"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                <h2 id={`post-title-${post.slug}`} class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
+                  <a href={`/blog/${post.slug}/`} class="hover:text-blue-600 transition-colors duration-200">
+                    {post.data.title}
                   </a>
-                  {post.data.tags && post.data.tags.length > 0 && (
-                    <div class="flex items-center space-x-2">
-                      {post.data.tags.slice(0, 2).map((t) => (
-                        <span
-                          class={`text-xs font-medium px-2.5 py-0.5 rounded-full ${
-                            t.toLowerCase() === tag.toLowerCase()
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {t}
-                        </span>
-                      ))}
-                      {post.data.tags.length > 2 && (
-                        <span class="text-xs font-medium text-gray-500 px-2 py-0.5">+{post.data.tags.length - 2}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                </h2>
+                <time class="text-sm text-gray-500 whitespace-nowrap font-medium" datetime={post.data.pubDate.toISOString()}>
+                  {getRelativeTime(post.data.pubDate)}
+                </time>
+              </div>
+
+              {post.data.description && (
+                <p class="text-gray-600 text-base mb-4 leading-relaxed">
+                  {post.data.description}
+                </p>
+              )}
+
+              <div class="flex items-center justify-between flex-wrap gap-3">
+                <a
+                  href={`/blog/${post.slug}/`}
+                  class="inline-flex items-center gap-1.5 text-blue-600 font-semibold focus:outline-none"
+                  aria-label={`Read more about ${post.data.title}`}
+                >
+                  Read article <span aria-hidden="true">→</span>
+                </a>
+
+                {post.data.tags && post.data.tags.length > 0 && (
+                  <div class="flex items-center gap-2 flex-wrap">
+                    {post.data.tags.slice(0, 3).map((t) => (
+                      <span
+                        class={`text-xs font-semibold px-3 py-1 rounded-full ${
+                          t.toLowerCase() === tag.toLowerCase()
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                    {post.data.tags.length > 3 && (
+                      <span class="text-xs font-medium text-gray-500">
+                        +{post.data.tags.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </article>
           ))}
-          <a
-            href="/blog"
-            class="inline-flex items-center mt-8 text-blue-600 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:rounded-lg"
-            aria-label="View all blog posts"
-          >
-            Back to all posts <span aria-hidden="true">→</span>
-          </a>
         </div>
       )}
     </div>
@@ -149,23 +163,30 @@ const filteredPosts = posts
 <style is:global>
   /* Fonts */
   body {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Smooth focus styles */
-  a:focus,
-  button:focus {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Clean focus styles */
+  a:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-    border-radius: 8px;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
 
-  a:focus-visible,
-  button:focus-visible {
-    transform: scale(1.02);
+  a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Responsive adjustments */
@@ -176,8 +197,15 @@ const filteredPosts = posts
     .text-4xl {
       font-size: 2.25rem;
     }
-    .p-6 {
-      padding: 1rem;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
     }
   }
 </style>

@@ -23,108 +23,177 @@ const { Content } = await post.render();
 // Recommended posts (exclude current post and limit to 3)
 const recommendedPosts = allPosts
   .filter(p => p.slug !== post.slug)
-  .sort(() => Math.random() - 0.5) // Shuffle for variety
+  .sort(() => Math.random() - 0.5)
   .slice(0, 3);
+
+const getRelativeTime = (date: string | Date): string => {
+  try {
+    const currentDate = new Date();
+    const diffMs = currentDate.getTime() - new Date(date).getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(date));
+  } catch {
+    return 'Unknown date';
+  }
+};
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
-  <!-- Scroll Progress Bar -->
-  <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50">
-    <div id="progress-bar" class="h-1 bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300 ease-out"></div>
+  <!-- Simple Progress Bar -->
+  <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+    <div id="progress-bar" class="h-1 bg-blue-600 transition-all duration-150"></div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <div class="flex flex-col lg:flex-row gap-12">
-      <!-- Main Article -->
-      <article class="lg:w-2/3 prose prose-lg prose-slate max-w-none font-serif leading-relaxed">
-        <header class="mb-12">
-          <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-gray-900 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-            {post.data.title}
-          </h1>
-          <div class="flex flex-wrap gap-2 mb-4">
-            {post.data.tags.map(tag => (
-              <span class="text-sm font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-                {tag}
-              </span>
-            ))}
+  <div class="min-h-screen" >
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      
+      <!-- Simple Back Button -->
+      <div class="mb-6">
+        <a 
+          href="/blog/" 
+          class="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium focus:outline-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to all posts
+        </a>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-8">
+        
+        <!-- Main Article - Clean and Readable -->
+        <article class="lg:w-2/3 bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-10">
+          <header class="mb-10">
+            
+            <!-- Tags -->
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div class="flex flex-wrap gap-2 mb-5">
+                {post.data.tags.map(tag => (
+                  <a 
+                    href={`/blog/tag/${tag.toLowerCase()}/`}
+                    class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors duration-200 focus:outline-none"
+                  >
+                    {tag}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            <!-- Title -->
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-gray-900 tracking-tight leading-tight">
+              {post.data.title}
+            </h1>
+            
+            <!-- Meta Info - Simple and Clear -->
+            <div class="flex flex-wrap items-center gap-4 text-gray-600 text-sm mb-6 pb-6 border-b border-gray-200">
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <time datetime={post.data.pubDate} class="font-medium">
+                  {new Date(post.data.pubDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </time>
+              </div>
+              
+              <span class="text-gray-300">•</span>
+              
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">{Math.ceil(post.body.split(' ').length / 200)} min read</span>
+              </div>
+            </div>
+
+            <!-- Featured Image -->
+            {post.data.image && (
+              <figure class="my-8">
+                <img 
+                  src={post.data.image} 
+                  alt={post.data.imageAlt || post.data.title} 
+                  class="w-full rounded-xl shadow-lg object-cover"
+                  loading="lazy"
+                />
+                {post.data.imageAlt && (
+                  <figcaption class="text-sm text-gray-500 mt-3 text-center">
+                    {post.data.imageAlt}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+          </header>
+
+          <!-- Blog Content - Easy to Read -->
+          <div class="prose prose-lg max-w-none">
+            <Content />
           </div>
-          <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-            <time datetime={post.data.pubDate} class="font-medium">
-              {new Date(post.data.pubDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </time>
-            <span> • {Math.ceil(post.body.split(' ').length /200)} min read</span> 
+
+          <!-- Bottom Navigation -->
+          <div class="mt-12 pt-8 border-t border-gray-200">
+            <a 
+              href="/blog/" 
+              class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 focus:outline-none"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to all posts
+            </a>
           </div>
-          {post.data.image && (
-            <figure class="my-10 text-center">
-              <img 
-                src={post.data.image} 
-                alt={post.data.imageAlt || post.data.title} 
-                class="w-full max-w-4xl mx-auto rounded-2xl shadow-xl object-cover transition-transform hover:scale-[1.02] duration-300"
-                loading="lazy"
-              />
-              {post.data.imageAlt && (
-                <figcaption class="text-sm text-gray-500 mt-3 italic">{post.data.imageAlt}</figcaption>
-              )}
-            </figure>
-          )}
-        </header>
+        </article>
 
-        <!-- Blog Content -->
-        <div class="content-area max-w-[850px] mx-auto space-y-3 text-lg ml-0">
-          <Content />
-        </div>
-
-       
-
-        <!-- Navigation -->
-        <div class="mt-8 flex justify-between pt-6 border-t border-gray-200">
-          <a href="/blog/" class="text-blue-600 hover:text-indigo-600 hover:underline font-medium transition-colors">
-            ← Back to all posts
-          </a>
-        </div>
-      </article>
-
-      <!-- Sidebar -->
-      <aside class="lg:w-1/3 lg:pl-8 lg:border-l lg:border-gray-200">
-        <div class="sticky top-24 space-y-12">
-          <!-- TOC -->
-          <div>
-            <h2 class="text-xl font-semibold mb-4 text-gray-900">Table of Contents</h2>
-            <nav id="toc" class="text-sm space-y-3 text-gray-600"></nav>
-          </div>
+        <!-- Sidebar - Clean and Organized -->
+        <aside class="lg:w-1/3 space-y-4">
+          
+          <!-- Table of Contents -->
+          <!-- <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              On This Page
+            </h2>
+            <nav id="toc" class="text-sm space-y-2"></nav>
+          </div> -->
 
           <!-- Recommended Reads -->
-          <div>
-            <h2 class="text-xl font-semibold mb-6 text-gray-900">Recommended Reads</h2>
-            <div class="space-y-6">
-              {recommendedPosts.map(recPost => (
-                <a href={`/blog/${recPost.slug}/`} class="block group">
-                  <article class="p-4 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
-                    <h3 class="text-lg font-semibold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {recPost.data.title}
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {recPost.data.description}
-                    </p>
-                    <div class="flex items-center gap-2 text-sm text-gray-500">
-                      <time datetime={recPost.data.pubDate}>
-                        {new Date(recPost.data.pubDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+          {recommendedPosts.length > 0 && (
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+              <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Related Articles
+              </h2>
+              <div class="space-y-4">
+                {recommendedPosts.map(recPost => (
+                  <a href={`/blog/${recPost.slug}/`} class="block group focus:outline-none">
+                    <article class="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                      <h3 class="font-bold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
+                        {recPost.data.title}
+                      </h3>
+                      <p class="text-sm text-gray-600 mb-2 line-clamp-2">
+                        {recPost.data.description}
+                      </p>
+                      <time class="text-xs text-gray-500 font-medium" datetime={recPost.data.pubDate}>
+                        {getRelativeTime(recPost.data.pubDate)}
                       </time>
-                    </div>
-                  </article>
-                </a>
-              ))}
+                    </article>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      </aside>
+          )}
+        </aside>
+      </div>
     </div>
   </div>
 </BaseLayout>
@@ -132,138 +201,261 @@ const recommendedPosts = allPosts
 <style is:global>
   /* Fonts */
   body {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     color: #1e293b;
+    -webkit-font-smoothing: antialiased;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prose Styling - Optimized for Reading */
   .prose {
-    font-family: 'Merriweather', serif;
-    line-height: 1.8;
-    color: #1e293b;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.75;
+    color: #374151;
+    font-size: 1.125rem;
   }
 
-  .prose h1, .prose h2, .prose h3 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 800;
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    font-weight: 700;
     color: #111827;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
   }
 
   .prose h2 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
     font-size: 1.875rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    margin-top: 3rem;
   }
 
-  /* Callouts */
-  .callout { 
-    padding: 1.25rem; 
-    border-radius: 0.75rem; 
-    margin: 1.5rem 0; 
-    font-size: 1rem; 
-    transition: transform 0.2s ease, box-shadow 0.2s ease; 
+  .prose h3 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
   }
-  .callout:hover { 
-    transform: translateY(-2px); 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+
+  .prose p {
+    margin-bottom: 1.5rem;
   }
-  .callout-tip { 
-    background: #e0f2fe; 
-    border-left: 4px solid #2563eb; 
-    color: #1e40af; 
+
+  .prose a {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 500;
   }
-  .callout-warning { 
-    background: #fef3c7; 
-    border-left: 4px solid #d97706; 
-    color: #92400e; 
+
+  .prose a:hover {
+    color: #1d4ed8;
   }
-  .callout-note { 
-    background: #d1fae5; 
-    border-left: 4px solid #059669; 
-    color: #065f46; 
+
+  .prose ul, .prose ol {
+    margin: 1.5rem 0;
+    padding-left: 1.75rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.75rem;
+  }
+
+  .prose strong {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  /* Callouts - Clear and Visible */
+  .callout {
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+    border-left: 4px solid;
+  }
+
+  .callout-tip {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+
+  .callout-warning {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+
+  .callout-note {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
   }
 
   /* Blockquote */
-  blockquote { 
-    border-left: 4px solid #3b82f6; 
-    padding: 1rem 1.5rem; 
-    font-style: italic; 
-    background: #f8fafc; 
-    border-radius: 0.75rem; 
-    color: #4b5563; 
-    margin: 1.5rem 0; 
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    padding: 1.25rem 1.5rem;
+    font-style: italic;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    color: #475569;
+    margin: 1.5rem 0;
   }
 
-  /* Code Blocks */
-  pre { 
-    position: relative; 
-    background: #1e293b !important; 
-    color: #f8fafc !important; 
-    padding: 1.5rem; 
-    border-radius: 0.75rem; 
-    overflow-x: auto; 
-    font-size: 0.9rem; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+  /* Code Blocks - Easy to Read */
+  pre {
+    position: relative;
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    margin: 1.5rem 0;
+    line-height: 1.7;
   }
-  pre code { 
-    font-family: 'Fira Code', monospace; 
+
+  pre code {
+    font-family: 'Fira Code', 'Courier New', monospace;
   }
-  .copy-btn { 
-    position: absolute; 
-    top: 0.75rem; 
-    right: 0.75rem; 
-    background: #475569; 
-    color: white; 
-    border-radius: 0.5rem; 
-    padding: 0.5rem 1rem; 
-    font-size: 0.85rem; 
-    cursor: pointer; 
-    transition: background 0.2s, transform 0.2s; 
+
+  .copy-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: #475569;
+    color: white;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    font-weight: 600;
   }
-  .copy-btn:hover { 
-    background: #64748b; 
-    transform: scale(1.05); 
+
+  .copy-btn:hover {
+    background: #64748b;
   }
-  .copy-btn:active { 
-    background: #2563eb; 
-    transform: scale(0.95); 
+
+  .copy-btn:active {
+    background: #2563eb;
+  }
+
+  /* Inline code */
+  .prose code {
+    background: #fef3c7;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  .prose pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
   }
 
   /* Images */
-  .content-area img { 
-    border-radius: 0.75rem; 
-    transition: transform 0.3s ease, box-shadow 0.3s ease; 
-  }
-  .content-area img:hover { 
-    transform: scale(1.02); 
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); 
+  .prose img {
+    border-radius: 0.75rem;
+    margin: 2rem 0;
   }
 
-  /* TOC */
-  #toc a { 
-    display: block; 
-    padding: 0.5rem 0; 
-    transition: color 0.2s ease, transform 0.2s ease; 
-    border-left: 2px solid transparent; 
+  /* Tables */
+  .prose table {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
   }
-  #toc a:hover { 
-    color: #2563eb; 
-    transform: translateX(4px); 
-    border-left-color: #2563eb; 
+
+  .prose th,
+  .prose td {
+    border: 1px solid #e5e7eb;
+    padding: 0.75rem;
+    text-align: left;
   }
-  #toc a[class="ml-4"] { 
-    padding-left: 1rem; 
-    font-size: 0.95rem; 
+
+  .prose th {
+    background: #f9fafb;
+    font-weight: 600;
+  }
+
+  /* TOC - Simple and Clear */
+  #toc a {
+    display: block;
+    padding: 0.625rem;
+    color: #64748b;
+    transition: all 0.2s;
+    border-radius: 0.375rem;
+    font-weight: 500;
+  }
+
+  #toc a:hover {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+
+  #toc a.ml-4 {
+    padding-left: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+
+  /* Line Clamp */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Focus Styles */
+  a:focus {
+    outline: none;
+  }
+
+  a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove tap highlight */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Responsive */
-  @media (max-width: 1024px) { 
-    aside { display: none; } 
-    .prose { max-width: 100%; }
+  @media (max-width: 1024px) {
+    aside {
+      display: none;
+    }
   }
+
   @media (max-width: 640px) {
-    .content-area { padding: 0; }
-    h1 { font-size: 2.25rem; }
+    .prose {
+      font-size: 1rem;
+    }
+    .prose h2 {
+      font-size: 1.5rem;
+    }
+    .prose h3 {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 
@@ -274,38 +466,44 @@ const recommendedPosts = allPosts
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      document.getElementById("progress-bar")!.style.width = `${progress}%`;
+      const progressBar = document.getElementById("progress-bar");
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
     };
 
     window.addEventListener("scroll", updateProgress, { passive: true });
     window.addEventListener("resize", updateProgress, { passive: true });
-
-    // Cleanup
-    window.addEventListener("unload", () => {
-      window.removeEventListener("scroll", updateProgress);
-      window.removeEventListener("resize", updateProgress);
-    });
   }
 
-  // TOC Generator with Smooth Scrolling
+  // TOC Generator
   if (typeof window !== "undefined") {
     window.addEventListener("DOMContentLoaded", () => {
-      const headings = document.querySelectorAll(".content-area h2, .content-area h3");
-      const toc = document.getElementById("toc")!;
-      headings.forEach((h: HTMLElement, i: number) => {
-        if (!h.id) h.id = `section-${i + 1}`;
-        const link = document.createElement("a");
-        link.href = `#${h.id}`;
-        link.textContent = h.textContent || "";
-        link.className = h.tagName === "H2" ? "font-medium" : "ml-4";
-        link.setAttribute("aria-label", `Jump to ${h.textContent}`);
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          document.querySelector(`#${h.id}`)?.scrollIntoView({ behavior: "smooth" });
-          window.history.pushState(null, "", `#${h.id}`);
+      const headings = document.querySelectorAll(".prose h2, .prose h3");
+      const toc = document.getElementById("toc");
+      
+      if (toc && headings.length > 0) {
+        headings.forEach((h, i) => {
+          const heading = h as HTMLElement;
+          if (!heading.id) heading.id = `section-${i + 1}`;
+          
+          const link = document.createElement("a");
+          link.href = `#${heading.id}`;
+          link.textContent = heading.textContent || "";
+          link.className = heading.tagName === "H2" ? "font-semibold" : "ml-4";
+          
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const target = document.querySelector(`#${heading.id}`);
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth" });
+              window.history.pushState(null, "", `#${heading.id}`);
+            }
+          });
+          
+          toc.appendChild(link);
         });
-        toc.appendChild(link);
-      });
+      }
     });
   }
 
@@ -316,25 +514,26 @@ const recommendedPosts = allPosts
         const button = document.createElement("button");
         button.textContent = "Copy";
         button.className = "copy-btn";
-        button.setAttribute("aria-label", "Copy code to clipboard");
+        
         button.addEventListener("click", async () => {
           try {
-            await navigator.clipboard.writeText(block.querySelector("code")?.innerText || "");
-            button.textContent = "Copied!";
-            button.setAttribute("aria-label", "Code copied");
-            setTimeout(() => {
-              button.textContent = "Copy";
-              button.setAttribute("aria-label", "Copy code to clipboard");
-            }, 2000);
+            const code = block.querySelector("code");
+            if (code) {
+              await navigator.clipboard.writeText(code.innerText);
+              button.textContent = "Copied!";
+              setTimeout(() => {
+                button.textContent = "Copy";
+              }, 2000);
+            }
           } catch (err) {
             console.error("Failed to copy:", err);
             button.textContent = "Error";
             setTimeout(() => button.textContent = "Copy", 2000);
           }
         });
+        
         block.appendChild(button);
       });
-    }); }
+    });
+  }
 </script>
-
-
