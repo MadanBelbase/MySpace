@@ -1,0 +1,206 @@
+---
+title: "Why Your App Crashes When the API Sends Unexpected Data — and How Zod Fixes It?"
+description: "Learn why your app crashes due to unexpected API data types and how Zod, a TypeScript-first validation library, prevents runtime errors by enforcing data structure at runtime."
+pubDate: "2025-11-5"
+tags: ["JavaScript", "Zod", "API"]
+---
+
+You’ve built a new website that takes input from a user or receives a response from an API. Everything seems fine — until suddenly, your app crashes.
+
+Why?  
+Because instead of sending a string, the API sends a number or boolean.
+
+When your website expects a string from an API or user input but receives a number or boolean, it can lead to runtime errors because:
+
+- **Type Mismatch**: Your code may assume that the data is a string and try to perform operations such as `.toUpperCase()` or `.trim()`. However, these operations will fail if the data is a number or boolean, resulting in errors like `TypeError: toUpperCase is not a function`.
+- **No Runtime Validation**: JavaScript is dynamically typed, so type errors aren’t caught until runtime unless you explicitly validate the data.
+- **API Inconsistency**: APIs can change or return unexpected data (e.g., `{ name: 123 }` instead of `{ name: "Alice" }`), especially if they’re third-party or under development.
+
+```jsx
+// Your code expects a string.
+function processResponse(data) {
+  return data.name.toUpperCase(); // Error if data.name is 123 or true
+}
+
+// API sends unexpected data
+const apiResponse = { name: 123 }; // or { name: true }
+processResponse(apiResponse); // Crash: TypeError
+
+```
+
+## Meet Zod — Your Data Validation Shield
+
+**Zod** is a TypeScript-first schema declaration and validation library for JavaScript and TypeScript applications. It allows you to define the expected shape of your data (e.g., objects, strings, numbers) using a concise, chainable API. Zod validates data at runtime and infers TypeScript types automatically, ensuring both runtime safety and compile-time type checking.
+
+### Key features:
+- **Type Safety**: Automatically generates TypeScript types from schemas.
+- **Runtime Validation**: Catches invalid data before it causes errors.
+- **Great Error Messages**: Provides detailed, human-readable errors.
+- **Lightweight**: ~4KB minified, no dependencies.
+- **Ecosystem**: Works with React, Node.js, Next.js, tRPC, Prisma, and more.
+
+Zod is ideal for validating user inputs, API responses, or database data, making it perfect for your scenario.
+
+Let's understand Zod's simple use case.
+
+```jsx
+import * as z from "zod";
+
+const Player = z.object({
+  username: z.string(),
+  xp: z.number()
+});
+
+// Valid data
+const validData = { username: "AshKetchum", xp: 10000 };
+Player.parse(validData); // Passes validation
+
+// Invalid data
+const invalidData = { username: "Misty", xp: "a lot" };
+Player.parse(invalidData); // Throws ZodError
+```
+In this example, we define a `Player` schema with `username` as a string and `xp` as a number. When we call `Player.parse()`, Zod checks the data against the schema. If the data is valid, it passes; if not, it throws a `ZodError` with details about what went wrong.
+
+### Solving the Crash with Zod
+Let’s solve the problem of your app crashing due to unexpected API data. We’ll use Zod to validate that the API response contains a name field as a string. If the data is invalid (e.g., a number or boolean), Zod will catch it early and provide clear error messages, preventing the crash.
+
+### Step 1: Install Zod
+Run this command to install Zod:
+```
+npm install Zod 
+
+```
+
+### Step 2: Define a Zod Schema
+Create a schema to enforce that the API response has a name field that’s a string:
+
+
+
+```jsx
+import { z } from 'zod';
+
+// Define the schema
+const ResponseSchema = z.object({
+  name: z.string().min(1, { message: "Name must be a non-empty string" }),
+});
+
+```
+
+
+### Step 3: Validate the API Response
+When you fetch data from an API, you can use Zod to make sure the response matches the expected structure before using it in your app.
+
+```jsx
+import { z } from "zod";
+
+// 1️⃣ Define the expected response schema
+const userSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+  isActive: z.boolean(),
+});
+
+// 2️⃣ Fetch data from API
+async function fetchUserData() {
+  const response = await fetch("https://api.example.com/user/1");
+  const data = await response.json();
+
+  // 3️⃣ Validate the response using Zod
+  const parsedData = userSchema.parse(data);
+
+  console.log("✅ Validated User:", parsedData);
+}
+
+// 4️⃣ Call the function
+fetchUserData().catch((err) => {
+  console.error("❌ Validation or Fetch Error:", err.message);
+});
+
+```
+
+Explanation:
+z.object({}) defines what structure you expect from the API.
+userSchema.parse(data) ensures the response matches the schema.
+If the API sends unexpected data (like a missing field or wrong type), Zod will throw an error — helping prevent runtime crashes
+
+### Step 4: Real-World Example (React Form or API)
+
+If your website handles user input or API data, here’s how to integrate Zod with a React form using react-hook-form to validate user input, or with a Node.js API to validate responses.
+
+```
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Schema
+const FormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+function UserForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(FormSchema),
+  });
+
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    console.log("Validated data:", data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register("name")} placeholder="Enter name" />
+      {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+Install react-hook-form and @hookform/resolvers
+```
+npm install react-hook-form @hookform/resolvers 
+    ```
+Zod ensures the name input is a non-empty string, and errors are displayed to the user if validation fails.
+
+#### Node.js API Example
+For an API endpoint expecting a JSON payload:
+```
+import express from 'express';
+import { z } from 'zod';
+
+const app = express();
+app.use(express.json());
+
+const ResponseSchema = z.object({
+  name: z.string().min(1, "Name must be a non-empty string"),
+});
+
+app.post('/api/user', (req, res) => {
+  const result = ResponseSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.format() });
+  }
+
+  const { name } = result.data;
+  res.json({ message: `Hello, ${name.toUpperCase()}!` });
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
+```
+
+
+
+###  Why Zod Solves Your Problem
+
+Prevents Type Errors: Zod ensures name is a string before your code processes it, avoiding errors like TypeError: toUpperCase is not a function.
+TypeScript Integration: You get compile-time type safety (e.g., name: string) without writing separate interfaces.
+Flexible Error Handling: Use .safeParse() for graceful error handling in UI or API contexts.
+Scalable: Easily extend the schema for complex data (e.g., nested objects, arrays, or unions).
+
+### Conclusion
+Your app crashes because it doesn’t validate API or user input before processing, leading to type mismatches. Zod solves this by letting you define strict schemas, validate data at runtime, and catch errors early. Whether you’re building a React form, a Node.js API, or a full-stack TypeScript app, Zod ensures your data is what you expect, preventing crashes and improving reliability.
+
+ 
+ 
