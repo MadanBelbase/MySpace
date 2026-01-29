@@ -16,12 +16,12 @@ const sortedPosts = posts.sort((a, b) =>
   <!-- Hero Section -->
   
 
-  <div class="max-w-7xl mx-auto px-4 py-16  relative z-10">
+  <div class="max-w-7xl mx-auto px-4 py-2  relative z-10">
     
     <!-- Featured Post -->
     {sortedPosts.length > 0 && (
       <div class="mb-20">
-        <div class="flex items-center gap-3 mb-8">
+        <div class="flex items-center gap-3 mb-4">
           <div class="w-2 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full"></div>
           <h2 class="text-2xl font-bold text-gray-900">Featured Article</h2>
         </div>
@@ -78,7 +78,7 @@ const sortedPosts = posts.sort((a, b) =>
     )}
 
     <!-- All Posts Grid -->
-    <div class="mb-16">
+    <div class="mb-6">
       <div class="flex items-center gap-3 mb-8">
         <div class="w-2 h-8 bg-gradient-to-b from-gray-500 to-gray-700 rounded-full"></div>
         <h2 class="text-2xl font-bold text-gray-900">All Articles</h2>
