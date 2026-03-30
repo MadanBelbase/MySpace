@@ -6,525 +6,114 @@ import '../../styles/global.css';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map(post => ({
+  const sortedPosts = posts.sort((a, b) => 
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+  );
+  
+  return sortedPosts.map((post, index) => ({
     params: { slug: post.slug },
-    props: { post, allPosts: posts },
+    props: { 
+      post, 
+      nextPost: index > 0 ? sortedPosts[index - 1] : null,
+      prevPost: index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null
+    },
   }));
 }
 
 interface Props {
   post: CollectionEntry<'blog'>;
-  allPosts: CollectionEntry<'blog'>[];
+  nextPost: CollectionEntry<'blog'> | null;
+  prevPost: CollectionEntry<'blog'> | null;
 }
 
-const { post, allPosts } = Astro.props;
+const { post, nextPost, prevPost } = Astro.props;
 const { Content } = await post.render();
-
-// Recommended posts (exclude current post and limit to 3)
-const recommendedPosts = allPosts
-  .filter(p => p.slug !== post.slug)
-  .sort(() => Math.random() - 0.5)
-  .slice(0, 3);
-
-const getRelativeTime = (date: string | Date): string => {
-  try {
-    const currentDate = new Date();
-    const diffMs = currentDate.getTime() - new Date(date).getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(date));
-  } catch {
-    return 'Unknown date';
-  }
-};
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
-  <!-- Simple Progress Bar -->
-  <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-    <div id="progress-bar" class="h-1 bg-blue-600 transition-all duration-150"></div>
-  </div>
-
-  <div class="min-h-screen" >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+  <div class="min-h-screen py-20">
+    <article class="max-w-3xl mx-auto px-4 sm:px-6">
       
-      <!-- Simple Back Button -->
-      <div class="mb-6">
-        <a 
-          href="/blog/" 
-          class="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium focus:outline-none"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to all posts
+      <!-- Back Button -->
+      <div class="mb-12">
+        <a href="/blog/" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-colors">
+          ← Back to Archive
         </a>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-8">
+      <header class="mb-16">
+        <time class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-4 block">
+          {new Date(post.data.pubDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}
+        </time>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-8">
+          {post.data.title}
+        </h1>
         
-        <!-- Main Article - Clean and Readable -->
-        <article class="lg:w-2/3 bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-10">
-          <header class="mb-10">
-            
-            <!-- Tags -->
-            {post.data.tags && post.data.tags.length > 0 && (
-              <div class="flex flex-wrap gap-2 mb-5">
-                {post.data.tags.map(tag => (
-                  <a 
-                    href={`/blog/tag/${tag.toLowerCase()}/`}
-                    class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors duration-200 focus:outline-none"
-                  >
-                    {tag}
-                  </a>
-                ))}
-              </div>
-            )}
+        {post.data.image && (
+          <img 
+            src={post.data.image} 
+            alt={post.data.imageAlt || post.data.title} 
+            class="w-full rounded-2xl border border-gray-100 shadow-sm object-cover aspect-video mb-8"
+          />
+        )}
+      </header>
 
-            <!-- Title -->
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-gray-900 tracking-tight leading-tight">
-              {post.data.title}
-            </h1>
-            
-            <!-- Meta Info - Simple and Clear -->
-            <div class="flex flex-wrap items-center gap-4 text-gray-600 text-sm mb-6 pb-6 border-b border-gray-200">
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <time datetime={post.data.pubDate} class="font-medium">
-                  {new Date(post.data.pubDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
-              </div>
-              
-              <span class="text-gray-300">•</span>
-              
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-medium">{Math.ceil(post.body.split(' ').length / 200)} min read</span>
-              </div>
-            </div>
-
-            <!-- Featured Image -->
-            {post.data.image && (
-              <figure class="my-8">
-                <img 
-                  src={post.data.image} 
-                  alt={post.data.imageAlt || post.data.title} 
-                  class="w-full rounded-xl shadow-lg object-cover"
-                  loading="lazy"
-                />
-                {post.data.imageAlt && (
-                  <figcaption class="text-sm text-gray-500 mt-3 text-center">
-                    {post.data.imageAlt}
-                  </figcaption>
-                )}
-              </figure>
-            )}
-          </header>
-
-          <!-- Blog Content - Easy to Read -->
-          <div class="prose prose-lg max-w-none">
-            <Content />
-          </div>
-
-          <!-- Bottom Navigation -->
-          <div class="mt-12 pt-8 border-t border-gray-200">
-            <a 
-              href="/blog/" 
-              class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 focus:outline-none"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to all posts
-            </a>
-          </div>
-        </article>
-
-        <!-- Sidebar - Clean and Organized -->
-        <aside class="lg:w-1/3 space-y-4">
-          
-       
-
-          <!-- Recommended Reads -->
-          {recommendedPosts.length > 0 && (
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-              <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-                Related Articles
-              </h2>
-              <div class="space-y-4">
-                {recommendedPosts.map(recPost => (
-                  <a href={`/blog/${recPost.slug}/`} class="block group focus:outline-none">
-                    <article class="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
-                      <h3 class="font-bold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
-                        {recPost.data.title}
-                      </h3>
-                      <p class="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {recPost.data.description}
-                      </p>
-                      <time class="text-xs text-gray-500 font-medium" datetime={recPost.data.pubDate}>
-                        {getRelativeTime(recPost.data.pubDate)}
-                      </time>
-                    </article>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
+      <!-- Content -->
+      <div class="prose prose-indigo prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-a:text-indigo-600 prose-strong:text-gray-900">
+        <Content />
       </div>
-    </div>
+
+      <!-- Post Navigation (Instead of TOC) -->
+      <div class="mt-24 pt-12 border-t border-gray-100 flex flex-col sm:flex-row justify-between gap-8">
+        {prevPost && (
+          <a href={`/blog/${prevPost.slug}/`} class="flex-1 group">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-indigo-600 transition-colors">Previous Post</span>
+            <p class="text-lg font-bold text-gray-900 mt-2 group-hover:text-indigo-600 transition-colors">{prevPost.data.title}</p>
+          </a>
+        )}
+        {nextPost && (
+          <a href={`/blog/${nextPost.slug}/`} class="flex-1 group text-right">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-indigo-600 transition-colors">Next Post</span>
+            <p class="text-lg font-bold text-gray-900 mt-2 group-hover:text-indigo-600 transition-colors">{nextPost.data.title}</p>
+          </a>
+        )}
+      </div>
+    </article>
   </div>
 </BaseLayout>
 
 <style is:global>
-  /* Fonts */
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    color: #1e293b;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* Prose Styling - Optimized for Reading */
   .prose {
-    font-family: 'Inter', system-ui, sans-serif;
-    line-height: 1.75;
-    color: #374151;
     font-size: 1.125rem;
+    line-height: 1.8;
   }
-
-  .prose h1, .prose h2, .prose h3, .prose h4 {
-    font-weight: 700;
-    color: #111827;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    line-height: 1.3;
-  }
-
   .prose h2 {
     font-size: 1.875rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e5e7eb;
+    font-weight: 800;
     margin-top: 3rem;
-  }
-
-  .prose h3 {
-    font-size: 1.5rem;
-    margin-top: 2rem;
-  }
-
-  .prose p {
     margin-bottom: 1.5rem;
   }
-
-  .prose a {
-    color: #2563eb;
-    text-decoration: underline;
-    font-weight: 500;
+  .prose h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
   }
-
-  .prose a:hover {
-    color: #1d4ed8;
-  }
-
-  .prose ul, .prose ol {
-    margin: 1.5rem 0;
-    padding-left: 1.75rem;
-  }
-
-  .prose li {
-    margin-bottom: 0.75rem;
-  }
-
-  .prose strong {
-    color: #111827;
-    font-weight: 600;
-  }
-
-  /* Callouts - Clear and Visible */
-  .callout {
-    padding: 1.25rem 1.5rem;
-    border-radius: 0.75rem;
-    margin: 1.5rem 0;
-    border-left: 4px solid;
-  }
-
-  .callout-tip {
-    background: #eff6ff;
-    border-color: #3b82f6;
-    color: #1e40af;
-  }
-
-  .callout-warning {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
-  }
-
-  .callout-note {
-    background: #d1fae5;
-    border-color: #10b981;
-    color: #065f46;
-  }
-
-  /* Blockquote */
-  blockquote {
-    border-left: 4px solid #3b82f6;
-    padding: 1.25rem 1.5rem;
-    font-style: italic;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-    color: #475569;
-    margin: 1.5rem 0;
-  }
-
-  /* Code Blocks - Easy to Read */
   pre {
-    position: relative;
-    background: #1e293b !important;
-    color: #f8fafc !important;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
+    background: #111827 !important;
+    border-radius: 1rem !important;
+    padding: 1.5rem !important;
+    font-size: 0.875rem !important;
     overflow-x: auto;
-    font-size: 0.875rem;
-    margin: 1.5rem 0;
-    line-height: 1.7;
   }
-
-  pre code {
-    font-family: 'Fira Code', 'Courier New', monospace;
-  }
-
-  .copy-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: #475569;
-    color: white;
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: none;
-    font-weight: 600;
-  }
-
-  .copy-btn:hover {
-    background: #64748b;
-  }
-
-  .copy-btn:active {
-    background: #2563eb;
-  }
-
-  /* Inline code */
-  .prose code {
-    background: #fef3c7;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-    color: #92400e;
-    font-weight: 600;
-  }
-
-  .prose pre code {
-    background: transparent;
-    padding: 0;
-    color: inherit;
-  }
-
-  /* Images */
-  .prose img {
-    border-radius: 0.75rem;
-    margin: 2rem 0;
-  }
-
-  /* Tables */
-  .prose table {
-    width: 100%;
-    margin: 1.5rem 0;
-    border-collapse: collapse;
-  }
-
-  .prose th,
-  .prose td {
-    border: 1px solid #e5e7eb;
-    padding: 0.75rem;
-    text-align: left;
-  }
-
-  .prose th {
-    background: #f9fafb;
-    font-weight: 600;
-  }
-
-  /* TOC - Simple and Clear */
-  #toc a {
-    display: block;
-    padding: 0.625rem;
-    color: #64748b;
-    transition: all 0.2s;
-    border-radius: 0.375rem;
-    font-weight: 500;
-  }
-
-  #toc a:hover {
-    color: #2563eb;
-    background: #eff6ff;
-  }
-
-  #toc a.ml-4 {
+  blockquote {
+    border-left: 4px solid #e0e7ff;
     padding-left: 1.5rem;
-    font-size: 0.875rem;
-    font-weight: 400;
-  }
-
-  /* Line Clamp */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Focus Styles */
-  a:focus {
-    outline: none;
-  }
-
-  a:focus-visible {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  /* Remove tap highlight */
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Responsive */
-  @media (max-width: 1024px) {
-    aside {
-      display: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .prose {
-      font-size: 1rem;
-    }
-    .prose h2 {
-      font-size: 1.5rem;
-    }
-    .prose h3 {
-      font-size: 1.25rem;
-    }
-  }
-
-  /* Accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
+    font-style: italic;
+    color: #4b5563;
   }
 </style>
-
-<script>
-  // Scroll Progress Bar
-  if (typeof window !== "undefined") {
-    const updateProgress = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.body.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      const progressBar = document.getElementById("progress-bar");
-      if (progressBar) {
-        progressBar.style.width = `${progress}%`;
-      }
-    };
-
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    window.addEventListener("resize", updateProgress, { passive: true });
-  }
-
-  // TOC Generator
-  if (typeof window !== "undefined") {
-    window.addEventListener("DOMContentLoaded", () => {
-      const headings = document.querySelectorAll(".prose h2, .prose h3");
-      const toc = document.getElementById("toc");
-      
-      if (toc && headings.length > 0) {
-        headings.forEach((h, i) => {
-          const heading = h as HTMLElement;
-          if (!heading.id) heading.id = `section-${i + 1}`;
-          
-          const link = document.createElement("a");
-          link.href = `#${heading.id}`;
-          link.textContent = heading.textContent || "";
-          link.className = heading.tagName === "H2" ? "font-semibold" : "ml-4";
-          
-          link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const target = document.querySelector(`#${heading.id}`);
-            if (target) {
-              target.scrollIntoView({ behavior: "smooth" });
-              window.history.pushState(null, "", `#${heading.id}`);
-            }
-          });
-          
-          toc.appendChild(link);
-        });
-      }
-    });
-  }
-
-  // Code Copy Button
-  if (typeof window !== "undefined") {
-    window.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll("pre").forEach(block => {
-        const button = document.createElement("button");
-        button.textContent = "Copy";
-        button.className = "copy-btn";
-        
-        button.addEventListener("click", async () => {
-          try {
-            const code = block.querySelector("code");
-            if (code) {
-              await navigator.clipboard.writeText(code.innerText);
-              button.textContent = "Copied!";
-              setTimeout(() => {
-                button.textContent = "Copy";
-              }, 2000);
-            }
-          } catch (err) {
-            console.error("Failed to copy:", err);
-            button.textContent = "Error";
-            setTimeout(() => button.textContent = "Copy", 2000);
-          }
-        });
-        
-        block.appendChild(button);
-      });
-    });
-  }
-</script>
