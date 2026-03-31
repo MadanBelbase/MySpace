@@ -5,7 +5,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://madanbelbase.com.np', // no trailing slash needed
+  site: 'https://madanbelbase.com.np',
   integrations: [mdx()],
   vite: {
     plugins: [tailwindcss()],
