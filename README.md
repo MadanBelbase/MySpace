@@ -1,46 +1,75 @@
-# Astro Starter Kit: Basics
+# Madan Belbase -Blog
 
+A professional, minimal, and high-performance personal portfolio and blog built with **Astro 5** and **Tailwind CSS 4**.
+
+[Live Demo](https://madanbelbase.com.np)
+
+## ✨ Features
+
+- 🚀 **Built with Astro 5** for ultimate speed and performance.
+- 🎨 **Tailwind CSS 4** for a modern, sleek, and responsive design.
+- 📝 **MDX Support** for advanced blog content with interactive components.
+- 📱 **Fully Responsive** layout that looks great on any device.
+- 🔍 **SEO Optimized** with meta tags and clean semantic HTML.
+- 🏷️ **Dynamic Categorization** for blog posts and interests.
+
+## 🛠️ Tech Stack
+
+- **Framework:** [Astro](https://astro.build/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Content:** [MDX](https://mdxjs.com/)
+- **Type Safety:** [TypeScript](https://www.typescriptlang.org/)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have [Node.js](https://nodejs.org/) installed.
+
+### Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/madanbelbase/MySpace.git
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+
+### Development
+
+Start the local development server:
 ```sh
-npm create astro@latest -- --template basics
+npm run dev
+```
+The site will be available at `http://localhost:4321`.
+
+### Build
+
+Build the production-ready site:
+```sh
+npm run build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## 📂 Project Structure
 
 ```text
 /
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+├── public/          # Static assets (images, robots.txt, etc.)
+├── src/
+│   ├── assets/      # Local images and icons
+│   ├── components/  # Reusable UI components
+│   ├── content/     # Blog posts and content collections
+│   ├── layouts/     # Page templates
+│   └── pages/       # Route files (.astro, .md, .mdx)
+├── astro.config.mjs # Astro configuration
+└── package.json     # Project dependencies and scripts
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 📄 License
 
-## 🧞 Commands
+This project is licensed under the MIT License.
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+---
+Built with ❤️ by [Madan Belbase](https://github.com/madanbelbase)
