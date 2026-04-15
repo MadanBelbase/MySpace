@@ -1,0 +1,68 @@
+---
+title: "Optimizing the Critical Rendering Path: Re-Engineering My Blog for a Perfect Performance Score"
+description: "How an engineering student applied system-level optimization—from TCP slow start to WebP encoding—to drastically improve load times and achieve a perfect performance score."
+pubDate: "2026-04-15"
+tags: ["Frontend", "Engineering", "Web Performance"]
+---
+
+import BlogImage from "../../components/BlogImage.astro";
+
+As a frontend engineer, the job doesn’t end at development or deployment. What truly matters is performance—how fast a website loads, how smoothly it runs, and how consistently it performs across devices and network conditions.In this blog, I’ll share my journey of optimizing the critical rendering path of my blogging website. By applying system-level optimizations and leveraging modern web technologies, I was able to achieve a perfect performance score. Here’s how I did it.
+
+### 1. The Physics of Entropy: Solving the Asset Payload Problem (Image Optimization)
+
+while working on site The first thing I realized was that images were my biggest enemies. I was serving high-resolution PNGs, some as large as 2.1MB. To a user on a shared 4G cell tower, this is a massive "data tax."
+
+How I  Fixed  that :   I treated my images like signals that needed compression. I migrated everything to WebP. This format uses predictive coding to encode images calculating the difference between neighboring pixels rather than storing every single one.
+
+The Result: I shed 80% of the dead weight. My 4.5MB total page weight was suddenly slashed to 850KB without losing any visual clarity.
+
+```
+<picture>
+  <source srcset="assets/project-blog.webp" type="image/webp">
+  <img src="assets/project-spiderbot.jpg" 
+       alt="ESP32 Spider-Bot" 
+       loading="lazy" 
+       width="800" height="450">
+</picture>
+
+```
+###  2. Breaking the "Red Light": Mastering the Critical Path
+
+In my classes, we talk about bottlenecks in systems. I found mine in the Critical Rendering Path (CRP). Every time a browser sees a standard CSS or JS file in the header, it hits a "Red Light." It stops everything to fetch that file before showing a single pixel.
+
+The Engineering Fix: I performed "UI Triage." I identified the Critical CSS (the code for the hero section) and inlined it directly into the HTML. I then gave my JavaScript files the defer command.
+
+By moving non-essential tasks to a background thread, I allowed the browser's UI thread to focus entirely on painting the screen. FCP (First Contentful Paint) dropped from 2.8s to 0.8s.
+
+```
+<script src="js/main.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+```
+
+
+### 3. TCP Slow Start: Optimizing Network Requests
+TCP Slow Start is a fundamental part of how data is transmitted over the internet. When a user first visits my site, their browser has to establish a connection with my server, which involves a handshake process that can introduce latency. To optimize this, I implemented HTTP/2, which allows for multiplexing multiple requests over a single connection. This means that instead of waiting for each request to complete before sending the next one, the browser can send multiple requests simultaneously, significantly reducing load times.
+
+code snippet:
+
+```
+// Example of HTTP/2 server configuration
+const http2 = require('http2');
+const fs = require('fs');
+const server = http2.createSecureServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
+});
+server.on('stream', (stream, headers) => {
+  // Handle requests here
+});
+```
+
+Performance isn’t a nice-to-have feature — it’s a fundamental engineering problem. By treating the browser as a constrained system and the network as a lossy channel, I was able to apply the same principles we learn in OS, networks, and signal processing courses to the web.
+
+The best part? The site now feels instant, even on slow 3G/4G connections common in Nepal.
+
+If you're building a blog or any content-heavy site, start with the Critical Rendering Path. Everything else is secondary.
+
+Happy optimizing! 
